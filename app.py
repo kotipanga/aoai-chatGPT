@@ -169,18 +169,6 @@ AZURE_MLINDEX_QUERY_TYPE = os.environ.get("AZURE_MLINDEX_QUERY_TYPE")
 # Frontend Settings via Environment Variables
 AUTH_ENABLED = os.environ.get("AUTH_ENABLED", "true").lower() == "true"
 CHAT_HISTORY_ENABLED = AZURE_COSMOSDB_ACCOUNT and AZURE_COSMOSDB_DATABASE and AZURE_COSMOSDB_CONVERSATIONS_CONTAINER
-frontend_settings = { 
-    "auth_enabled": AUTH_ENABLED, 
-    "feedback_enabled": AZURE_COSMOSDB_ENABLE_FEEDBACK and CHAT_HISTORY_ENABLED,
-    "ui": {
-        "title": UI_TITLE,
-        "logo": UI_LOGO,
-        "chat_logo": UI_CHAT_LOGO or UI_LOGO,
-        "chat_title": UI_CHAT_TITLE,
-        "chat_description": UI_CHAT_DESCRIPTION,
-        "show_share_button": UI_SHOW_SHARE_BUTTON
-    }
-}
 
 def should_use_data():
     global DATASOURCE_TYPE
@@ -595,6 +583,27 @@ async def conversation():
 @bp.route("/frontend_settings", methods=["GET"])  
 def get_frontend_settings():
     try:
+        # UI configuration (optional)
+        UI_TITLE = os.environ.get("UI_TITLE") or "Contoso"
+        UI_LOGO = os.environ.get("UI_LOGO")
+        UI_CHAT_LOGO = os.environ.get("UI_CHAT_LOGO")
+        UI_CHAT_TITLE = os.environ.get("UI_CHAT_TITLE") or "Start chatting"
+        UI_CHAT_DESCRIPTION = os.environ.get("UI_CHAT_DESCRIPTION") or "This chatbot is configured to answer your questions"
+        UI_FAVICON = os.environ.get("UI_FAVICON") or "/favicon.ico"
+        UI_SHOW_SHARE_BUTTON = os.environ.get("UI_SHOW_SHARE_BUTTON", "true").lower() == "true"
+        
+        frontend_settings = { 
+            "auth_enabled": AUTH_ENABLED, 
+            "feedback_enabled": AZURE_COSMOSDB_ENABLE_FEEDBACK and CHAT_HISTORY_ENABLED,
+            "ui": {
+                "title": UI_TITLE,
+                "logo": UI_LOGO,
+                "chat_logo": UI_CHAT_LOGO or UI_LOGO,
+                "chat_title": UI_CHAT_TITLE,
+                "chat_description": UI_CHAT_DESCRIPTION,
+                "show_share_button": UI_SHOW_SHARE_BUTTON
+            }
+        }
         return jsonify(frontend_settings), 200
     except Exception as e:
         logging.exception("Exception in /frontend_settings")
